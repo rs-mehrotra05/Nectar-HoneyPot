@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Nectar — Live Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:     #0a0e13;
+  --bg2:    #111720;
+  --bg3:    #1a2233;
+  --border: #1e2d42;
+  --green:  #00ff9d;
+  --red:    #ff4560;
+  --amber:  #ffb347;
+  --blue:   #4db8ff;
+  --purple: #b388ff;
+  --text:   #c8d8e8;
+  --dim:    #5a7a99;
+  --mono:   'Share Tech Mono', monospace;
+  --sans:   'Inter', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--green);
+  letter-spacing: 2px;
+}
+.logo span { animation: blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hdr-right { display: flex; align-items: center; gap: 20px; }
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--green);
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.4; }
+}
+#clock { font-family: var(--mono); font-size: 13px; color: var(--dim); }
+
+/* ── MAIN ── */
+main { padding: 18px 24px; }
+
+/* ── STAT CARDS ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+}
+.sc-green::before { background: var(--green); }
+.sc-red::before   { background: var(--red);   }
+.sc-amber::before { background: var(--amber);  }
+.sc-blue::before  { background: var(--blue);   }
+
+.stat-label {
+  font-size: 11px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.stat-val {
+  font-family: var(--mono);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+}
+.sc-green .stat-val { color: var(--green); }
+.sc-red   .stat-val { color: var(--red);   }
+.sc-amber .stat-val { color: var(--amber);  }
+.sc-blue  .stat-val { color: var(--blue);   }
+.stat-sub { font-size: 11px; color: var(--dim); margin-top: 5px; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.panel-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dr { background: var(--red);    }
+.dg { background: var(--green);  }
+.da { background: var(--amber);  }
+.db { background: var(--blue);   }
+.dp { background: var(--purple); }
+
+/* ── LOG FEED ── */
+.log-feed { height: 320px; overflow-y: auto; }
+
+.log-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  animation: slideIn .3s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+.log-row:hover { background: var(--bg3); }
+
+.badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.b-red    { background: rgba(255,69,96,.12);  color: var(--red);    border: 1px solid rgba(255,69,96,.25);   }
+.b-amber  { background: rgba(255,179,71,.12); color: var(--amber);  border: 1px solid rgba(255,179,71,.25);  }
+.b-green  { background: rgba(0,255,157,.08);  color: var(--green);  border: 1px solid rgba(0,255,157,.2);    }
+.b-blue   { background: rgba(77,184,255,.1);  color: var(--blue);   border: 1px solid rgba(77,184,255,.2);   }
+.b-purple { background: rgba(179,136,255,.1); color: var(--purple); border: 1px solid rgba(179,136,255,.2);  }
+
+.log-main { font-size: 12px; color: var(--text); }
+.log-main code {
+  font-family: var(--mono);
+  background: var(--bg3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--amber);
+}
+.log-meta { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+/* ── BOTTOM GRID ── */
+.bot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── TABLE ── */
+.dtable { width: 100%; border-collapse: collapse; font-size: 12px; }
+.dtable th {
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.dtable td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+}
+.dtable tr:last-child td { border-bottom: none; }
+.dtable tr:hover td { background: var(--bg3); }
+
+.bar-wrap { display: flex; align-items: center; gap: 6px; }
+.bar-bg   { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; background: var(--red); transition: width .5s; }
+
+/* ── CRED LIST ── */
+.cred-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.cred-row:last-child { border-bottom: none; }
+.cred-pair { color: var(--amber); }
+.cs {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.cs-fail { background: rgba(255,69,96,.1);  color: var(--red);   border: 1px solid rgba(255,69,96,.2);  }
+.cs-ok   { background: rgba(0,255,157,.1);  color: var(--green); border: 1px solid rgba(0,255,157,.2);  }
+
+/* ── GEO PANEL ── */
+.geo-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; }
+.geo-row  { display: flex; justify-content: space-between; font-size: 12px; }
+.geo-k    { color: var(--dim); }
+.geo-v    { font-family: var(--mono); }
+.geo-v.danger { color: var(--red);   }
+.geo-v.ok     { color: var(--green); }
+
+/* ── EMPTY STATE ── */
+.empty {
+  padding: 20px 14px;
+  color: var(--dim);
+  font-size: 12px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">NECTAR v1.0<span>_</span></div>
+  <div class="hdr-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+    <div id="clock">--:--:-- UTC</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card sc-green">
+      <div class="stat-label">Total events</div>
+      <div class="stat-val" id="s-total">0</div>
+      <div class="stat-sub">All honeypot activity</div>
+    </div>
+    <div class="stat-card sc-red">
+      <div class="stat-label">Login attempts</div>
+      <div class="stat-val" id="s-logins">0</div>
+      <div class="stat-sub">SSH brute-force</div>
+    </div>
+    <div class="stat-card sc-amber">
+      <div class="stat-label">Commands logged</div>
+      <div class="stat-val" id="s-cmds">0</div>
+      <div class="stat-sub">Inside fake shell</div>
+    </div>
+    <div class="stat-card sc-blue">
+      <div class="stat-label">Unique IPs</div>
+      <div class="stat-val" id="s-ips">0</div>
+      <div class="stat-sub">Distinct attackers</div>
+    </div>
+  </div>
+
+  <!-- LIVE EVENT LOG -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">
+        <div class="dot dg"></div>
+        Live event log
+      </div>
+      <span id="ev-count" style="font-size:11px;color:var(--dim);font-family:var(--mono)">
+        0 events
+      </span>
+    </div>
+    <div class="log-feed" id="logfeed">
+      <div class="empty">Waiting for attacker connections...</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM 3 PANELS -->
+  <div class="bot-grid">
+
+    <!-- Top Attacker IPs -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title"><div class="dot dr"></div>Top attacker IPs</div>
+      </div>
+      <table class="dtable">
+        <thead>
+          <tr>
+            <th>IP address</th>
+            <th>Country</th>
+            <th>Hits</th>
+          </tr>
+        </thead>
+        <tbody id="ip-table">
+          <tr><td colspan="3" class="empty">No data yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Most Tried Passwords -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title"><div class="dot da"></div>Most-tried passwords</div>
+      </div>
+      <div id="pw-list">
+        <div class="empty">No data yet</div>
+      </div>
+    </div>
+
+    <!-- Geo Intelligence -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title"><div class="dot db"></div>Last attacker geo</div>
+      </div>
+      <div class="geo-body" id="geo-body">
+        <div class="empty">No connections yet</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ============================================================
+   JAVASCRIPT — polls Flask API every 3 seconds, updates UI
+   ============================================================ */
+
+// Clock — updates every second
+setInterval(() => {
+  document.getElementById('clock').textContent =
+    new Date().toISOString().split('T')[1].slice(0, 8) + ' UTC';
+}, 1000);
+
+// Track event IDs already shown (prevent duplicates)
+let shownIds = new Set();
+let lastGeoIp = null;
+
+// Badge style for each event type
+const BADGES = {
+  ssh_attempt:   { label: 'LOGIN', cls: 'b-red'    },
+  bait_accepted: { label: 'BAIT',  cls: 'b-green'  },
+  ssh_command:   { label: 'CMD',   cls: 'b-red'    },
+  http_request:  { label: 'HTTP',  cls: 'b-blue'   },
+  default:       { label: 'EVENT', cls: 'b-purple' },
+};
+
+function getBadge(type) {
+  return BADGES[type] || BADGES.default;
+}
+
+/* ── Fetch stat cards ── */
+async function fetchStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const d = await r.json();
+    document.getElementById('s-total').textContent  = d.total_events   || 0;
+    document.getElementById('s-logins').textContent = d.login_attempts || 0;
+    document.getElementById('s-cmds').textContent   = d.commands       || 0;
+    document.getElementById('s-ips').textContent    = d.unique_ips     || 0;
+  } catch(e) {}
+}
+
+/* ── Fetch and render live event log ── */
+async function fetchEvents() {
+  try {
+    const r = await fetch('/api/events');
+    const events = await r.json();
+    const feed = document.getElementById('logfeed');
+
+    // Remove placeholder on first real data
+    if (events.length > 0 && feed.querySelector('.empty')) {
+      feed.innerHTML = '';
+    }
+
+    // Only add events we haven't shown yet
+    // Events come newest-first so reverse to process oldest first
+    const newEvents = events
+      .filter(e => !shownIds.has(e.id))
+      .reverse();
+
+    newEvents.forEach(ev => {
+      shownIds.add(ev.id);
+      const b = getBadge(ev.type);
+
+      // Build the main text depending on event type
+      let main = '';
+      if (ev.type === 'ssh_attempt') {
+        main = `SSH login attempt — <code>${ev.username || '?'}</code> / <code>${ev.password || '?'}</code>`;
+      } else if (ev.type === 'bait_accepted') {
+        main = `Bait accepted — <code>${ev.username}</code>:<code>${ev.password}</code> — fake shell opened`;
+      } else if (ev.type === 'ssh_command') {
+        main = `Command executed: <code>${ev.command || ''}</code>`;
+      } else if (ev.type === 'http_request') {
+        main = `HTTP request: <code>${ev.command || ''}</code>`;
+      } else {
+        main = ev.type;
+      }
+
+      // Build metadata line
+      const meta = [
+        ev.ip      ? `src: ${ev.ip}`  : '',
+        ev.country ? ev.country        : '',
+        ev.city    ? ev.city           : '',
+        ev.timestamp ? ev.timestamp.slice(11, 19) + ' UTC' : '',
+      ].filter(Boolean).join(' · ');
+
+      // Create the row element
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      row.innerHTML = `
+        <span class="badge ${b.cls}">${b.label}</span>
+        <div>
+          <div class="log-main">${main}</div>
+          <div class="log-meta">${meta}</div>
+        </div>`;
+
+      // Prepend so newest appears at top
+      feed.prepend(row);
+
+      // Update geo panel with this attacker's info
+      if (ev.ip && ev.ip !== lastGeoIp) {
+        lastGeoIp = ev.ip;
+        updateGeo(ev);
+      }
+    });
+
+    document.getElementById('ev-count').textContent =
+      shownIds.size + ' events';
+
+  } catch(e) {}
+}
+
+/* ── Fetch and render top IPs table ── */
+async function fetchTopIPs() {
+  try {
+    const r = await fetch('/api/top_ips');
+    const data = await r.json();
+    if (!data.length) return;
+
+    const max = data[0].count;
+    document.getElementById('ip-table').innerHTML = data.map(d => `
+      <tr>
+        <td>${d.ip}</td>
+        <td>${d.country || '?'}</td>
+        <td>
+          <div class="bar-wrap">
+            <div class="bar-bg">
+              <div class="bar-fill" style="width:${Math.round(d.count / max * 100)}%"></div>
+            </div>
+            ${d.count}
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch(e) {}
+}
+
+/* ── Fetch and render most-tried passwords ── */
+async function fetchPasswords() {
+  try {
+    const r = await fetch('/api/passwords');
+    const data = await r.json();
+    const el = document.getElementById('pw-list');
+    if (!data.length) return;
+
+    el.innerHTML = data.map(d => `
+      <div class="cred-row">
+        <span class="cred-pair">${d.password}</span>
+        <span class="cs cs-fail">${d.count}x tried</span>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+/* ── Update geo intelligence panel ── */
+function updateGeo(ev) {
+  document.getElementById('geo-body').innerHTML = `
+    <div class="geo-row">
+      <span class="geo-k">IP address</span>
+      <span class="geo-v danger">${ev.ip || 'Unknown'}</span>
+    </div>
+    <div class="geo-row">
+      <span class="geo-k">Country</span>
+      <span class="geo-v danger">${ev.country || 'Unknown'}</span>
+    </div>
+    <div class="geo-row">
+      <span class="geo-k">City</span>
+      <span class="geo-v">${ev.city || 'Unknown'}</span>
+    </div>
+    <div class="geo-row">
+      <span class="geo-k">ISP</span>
+      <span class="geo-v">${ev.isp || 'Unknown'}</span>
+    </div>
+    <div class="geo-row">
+      <span class="geo-k">Port hit</span>
+      <span class="geo-v">${ev.port || 'Unknown'}</span>
+    </div>
+    <div class="geo-row">
+      <span class="geo-k">Last seen</span>
+      <span class="geo-v">${(ev.timestamp || '').slice(11, 19)} UTC</span>
+    </div>
+  `;
+}
+
+/* ── Poll all APIs every 3 seconds ── */
+function pollAll() {
+  fetchStats();
+  fetchEvents();
+  fetchTopIPs();
+  fetchPasswords();
+}
+
+// Run immediately on page load, then every 3 seconds
+pollAll();
+setInterval(pollAll, 3000);
+</script>
+</body>
+</html>

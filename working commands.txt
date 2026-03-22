@@ -1,0 +1,108 @@
+Step 1 — Honeypot Start Karo
+powershellcd C:\Users\rajsh\OneDrive\Desktop\Nectar
+python main.py
+```
+
+Yeh dikhega terminal mein:
+```
+[DB] Ready → honeypot.db
+[SSH] Listening on 0.0.0.0:2222
+[HTTP] Listening on 0.0.0.0:8080
+[DASH] http://0.0.0.0:5000
+[*] Press Ctrl+C to stop
+Teeno ek saath chal rahe hain:
+
+SSH honeypot → port 2222
+HTTP honeypot → port 8080
+Dashboard → port 5000
+
+
+Step 2 — SSH Attack Karo (New Terminal Mein)
+Ctrl + Shift + ``  dabao VS Code mein — nayi terminal khulegi.
+powershell# Pehle wrong password try karo
+ssh root@localhost -p 2222
+```
+
+Password maangega — yeh try karo:
+```
+123456       ← FAILED dikhega
+admin        ← FAILED dikhega
+password     ← SUCCESS — fake shell milegi!
+Fake shell milne ke baad yeh commands chalao:
+bashwhoami
+id
+uname -a
+cat /etc/passwd
+cat /etc/shadow
+ls /home
+ps aux
+ifconfig
+history
+exit
+```
+
+---
+
+## Step 3 — HTTP Attack Karo
+
+Browser mein yeh URLs kholo ek ek karke:
+```
+http://localhost:8080
+http://localhost:8080/admin
+http://localhost:8080/wp-admin
+http://localhost:8080/phpmyadmin
+http://localhost:8080/panel
+```
+
+Har URL par **fake login page** milega. Kuch bhi type karke submit karo:
+```
+Username: admin
+Password: admin123
+```
+
+Submit karo — yeh sab log ho jaayega dashboard mein.
+
+---
+
+## Step 4 — Dashboard Dekho
+
+Browser mein kholo:
+```
+http://localhost:5000
+```
+
+Yahan real time mein dikhega:
+```
+LOGIN badge  → SSH login attempt
+BAIT badge   → Bait password accepted
+CMD badge    → Command executed in fake shell
+HTTP badge   → HTTP request logged
+```
+
+---
+
+## Dono Ek Saath Test Karne Ka Best Tarika
+
+Yeh layout use karo apni screen par:
+```
+┌─────────────────────┬──────────────────────┐
+│   Terminal 1        │   Terminal 2          │
+│   python main.py    │   ssh root@localhost  │
+│   (honeypot running)│   -p 2222             │
+├─────────────────────┴──────────────────────┤
+│              Browser                        │
+│   Left tab: http://localhost:5000 (dashboard)│
+│   Right tab: http://localhost:8080 (HTTP     │
+│              honeypot attack)               │
+└─────────────────────────────────────────────┘
+
+Agar Koi Error Aaye
+SSH mein "Connection Refused":
+powershell# Check karo ki port 2222 chal raha hai
+netstat -an | findstr 2222
+HTTP mein page nahi khul raha:
+powershell# Check karo ki port 8080 chal raha hai
+netstat -an | findstr 8080
+Known hosts error aaye SSH mein:
+powershellssh-keygen -R "[localhost]:2222"
+ssh root@localhost -p 2222
