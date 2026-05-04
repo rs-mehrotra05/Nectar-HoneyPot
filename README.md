@@ -359,6 +359,6 @@ This project is licensed under the MIT License.
  
 ---
  
-> **Built as a 3rd Year CSE Cybersecurity Project — 2025**
+> **Built as a 3rd Year Computer Science Project**
 >
 > *The attacker thinks they won. We planned it from the beginning.*
